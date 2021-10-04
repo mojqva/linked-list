@@ -238,7 +238,7 @@ List *quickSortRecur(List *head, List *end) {
 
 // главнаяя функция-обертка для рекурсирной сортировки 
 void quickSort(List *headRef) {
-    headRef = quickSortRecur(eheadRef, getTail(headRef));
+    headRef = quickSortRecur(headRef, getTail(headRef));
     return;
 }
 
@@ -247,21 +247,29 @@ void quickSort(List *headRef) {
 int main() {
     // создаем элемент и помещаем его в указатель на переменную list 
     List *list = create(0, "Nik");
+
+    printf("BEFORE\n\n\n");
+    print_list(list);
     // добавляем элемент по указанному, с помощью "&", адресу
     add_element_front(&list, 7, "Buzz");
     add_element_front(&list, 2, "Leo");
     add_element_back(&list, 11, "John");
     add_element_back(&list, -2, "Liza");
     insert_element(&list, 2, 99, "INSERT");
-    
-    printf("BEFORE\n");
-    print_list(list);
+    list = remove_element(&list, -2);
+    update_element(&list, 99, 12, "Updated");
+    List *by_id = search_by_id(&list, 7); // 7 Buzz
+    List *by_name = search_by_name(&list, "Updated"); // 11 John
 
+    //TODO
     // programm crashes
-    quickSort(list);
+    // quickSort(list);
 
-    printf("AFTER\n");
+    printf("AFTER\n\n\n");
     print_list(list);
+
+    printf("By ID:\n%d  %s\n\n", by_id -> id, by_id -> name);
+    printf("By Name:\n%d  %s\n\n", by_name->id, by_name->name);
 
     // препятствую автоматическому закрытию консоли
     system("pause");
