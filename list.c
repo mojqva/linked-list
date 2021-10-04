@@ -24,6 +24,16 @@ List *create(int set_id, char *set_name) {
     return tmp;
 }
 
+void print_list(List *list) {
+    while (list)
+    {
+        // вывод значения узла
+        printf("ID : %d, name : %s\n", list->id, list->name);
+        // сдвиг указателя к следующему узлу
+        list = list->next;
+    }
+}
+
 void add_element_front(List **list, int set_id, char *set_name){
     // создаю новый узел
     List *new_element = create(set_id, set_name);
@@ -144,27 +154,114 @@ List *search_by_name(List **list, char *search_name)
     return *list;
 }
 
+//###############QUICKSORT-START######################
+
+//функция для получения последнего элемента списка
+List *getTail(List *cur){
+    while(cur != NULL && cur -> next != NULL) {
+        cur = cur -> next;
+    }
+    return cur;
+};
+
+// функция для разделения списка используя последний элемент как основу
+List *partition(List *head, List *end, List *newHead, List *newEnd) {
+    List *pivot = end;
+    List *prev = NULL, *cur = head, *tail = pivot;
+
+    // во время разделения списка, его начало и конец буду изменяться и 
+    // записываться в newHead и newEnd
+    while(cur != pivot) {
+        if(cur -> id < pivot -> id) {
+            // первый элемент который меньше чем опора (pivot)
+            // становится новый началом (newHead)
+            if(newHead == NULL) {
+                newHead = cur;
+            }
+            prev = cur;
+            cur = cur -> next;
+        }
+        // если текущий элемент cur больше чем пивот
+        else {
+            // Двигаем cur элемент к хвосту и меняем tail
+            if(prev){
+                prev -> next = cur -> next;
+            }
+            List *tmp = cur -> next;
+            cur -> next = NULL;
+            tail -> next = cur;
+            tail = cur;
+            cur = tmp;
+
+        }
+    }
+    // если пивот - самый маленький айди в списке, то он идет в начало списка
+    if(newHead == NULL) {
+        newHead == pivot;
+    }
+    // Текущий последний элемент закидываем в newEnd
+    newEnd = tail;
+    // возвращаем опору (пивот)
+    return pivot;
+}
+
+// функция сортировки списка рекурсивным методом исключая последний элемент
+List *quickSortRecur(List *head, List *end) {
+    // основное условие 
+    if(!head || head == end) {
+        return head;
+    }
+
+    List *newHead = NULL, *newEnd = NULL;
+    // делим список, newHead и newEnd будут обновлены функцией деления partition
+    List *pivot = partition(head, end, newHead, newEnd);
+    // если пивот - самый маленький айди в списке , то левую часть не сортируем
+    if(newHead != pivot) {
+        // сохраняем элемент до того как обнулим пивот
+        List *tmp = newHead;
+        while(tmp -> next != pivot) {
+            tmp = tmp -> next;
+        }
+        tmp -> next = NULL;
+
+        // сортировка рекурсивом списка перед пивотом (левая часть)
+        newHead = quickSortRecur(newHead, tmp);
+        // меняем next у последнего элемента левой половины на значение пивота
+        tmp = getTail(newHead);
+        tmp -> next = pivot;  
+    }
+    // сортировка рекурсивом списка после пивота (правая часть)
+    pivot -> next = quickSortRecur(pivot -> next, newEnd);
+
+    return newHead;
+}
+
+// главнаяя функция-обертка для рекурсирной сортировки 
+void quickSort(List *headRef) {
+    headRef = quickSortRecur(eheadRef, getTail(headRef));
+    return;
+}
+
+//###############QUICKSORT-END########################
+
 int main() {
     // создаем элемент и помещаем его в указатель на переменную list 
     List *list = create(0, "Nik");
     // добавляем элемент по указанному, с помощью "&", адресу
-    add_element_front(&list, -1, "Buzz");
-    add_element_front(&list, -2, "Leo");
-    add_element_back(&list, 1, "John");
-    add_element_back(&list, 2, "Liza");
-    insert_element(&list, 1, 999, "INSERT");
-    list = remove_element(&list, -5);
-    update_element(&list, -1, 9, "Buzz");
+    add_element_front(&list, 7, "Buzz");
+    add_element_front(&list, 2, "Leo");
+    add_element_back(&list, 11, "John");
+    add_element_back(&list, -2, "Liza");
+    insert_element(&list, 2, 99, "INSERT");
+    
+    printf("BEFORE\n");
+    print_list(list);
 
-    List *look_for = search_by_name(&list, "Buzz");
-    printf("id = %d\nname = %s\n", look_for -> id, look_for -> name);
+    // programm crashes
+    quickSort(list);
 
-    while(list) {
-        // вывод значения узла
-        printf("ID : %d, name : %s\n", list -> id, list -> name);
-        // сдвиг указателя к следующему узлу
-        list = list -> next;
-    }
+    printf("AFTER\n");
+    print_list(list);
 
     // препятствую автоматическому закрытию консоли
     system("pause");
